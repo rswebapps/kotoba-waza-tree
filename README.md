@@ -14,8 +14,10 @@ GitHub Pages のページを Chrome・Edge で開くと、アドレスバーの�
   - ことばのわざ：〔知識及び技能〕⑴〜⑶ に由来する、両領域で共有するわざ
   - そうさのわざ：線・囲み・矢印・番号など、本文に書き込む単純な操作
 - **つながり**：327 本のエッジ（手がかり／主題へ／要旨へ／比べる／効果／関わり）
+- **ことばのわざ宇宙**：わざとつながりを、ことば・そうさ・説明・文学の4つの銀河の3D空間として見る別画面（`uchu.html`）。左の「ことばのわざ宇宙へ」から別の窓で開きます
 - **系統・根拠**：各わざに、学習指導要領解説の該当箇所と参考文献を表示
 - **教材を選ぶ・探究のぶき**：教材や学年に合わせて、使うわざを絞り込んで見る
+- **指導計画ファイルを作るプロンプト**：教科書会社の年間指導計画から、生成AIで .sdkk を作るためのプロンプト（[prompts/shidou_keikaku_prompt.md](prompts/shidou_keikaku_prompt.md)）。アプリの「リストを書き出す／読み込む」からもダウンロードできます
 - **教材データの読み込み**：`.sdkk` 形式の教材データを読み込むと、その教材の単元配置に合わせて表示（データはブラウザ内にだけ保存）
 
 ## データの扱い
@@ -28,12 +30,15 @@ GitHub Pages のページを Chrome・Edge で開くと、アドレスバーの�
 
 ```
 index.html              アプリ本体（データ埋め込み済み・単体で動く）
+uchu.html               ことばのわざ概念宇宙（わざとつながりの3Dビューワー。データ埋め込み済み）
 src/app_template.html   アプリのテンプレート
+src/uchu_template.html  概念宇宙のテンプレート
 data/core_data.json     わざ・つながり・根拠の本体データ
-build.py                テンプレートにデータを埋め込んで index.html を作る
+build.py                テンプレートにデータを埋め込んで index.html と uchu.html を作る
 manifest.webmanifest    アプリとしてインストールするための設定（PWA）
 sw.js                   オフラインでも開けるようにする仕組み
 icons/                  アプリのアイコン
+prompts/                生成AIに渡すプロンプト（指導計画ファイル作成用）
 SOURCES.md              出典
 LICENSE                 コードのライセンス（MIT）
 LICENSE-DATA.md         データのライセンス（CC BY-SA 4.0）
@@ -41,7 +46,7 @@ LICENSE-DATA.md         データのライセンス（CC BY-SA 4.0）
 
 ## 作り直し方
 
-`data/core_data.json` または `src/app_template.html` を直したら、次を実行します（Python 3、追加ライブラリ不要）。
+`data/core_data.json` または `src/` のテンプレートを直したら、次を実行します（Python 3、追加ライブラリ不要）。
 
 ```
 python3 build.py

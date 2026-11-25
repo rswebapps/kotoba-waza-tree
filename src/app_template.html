@@ -53,6 +53,7 @@ header{background:var(--white);border-bottom:1px solid var(--line);position:stic
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%}
 .d1{background:var(--b1)} .d2{background:var(--b2)} .d3{background:var(--b3)}
 .btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 12px;font-size:13px;font-weight:700}
+a.btn{color:inherit;text-decoration:none;display:inline-block}
 .btn:hover{background:#f0f4f6}
 .btn.primary{background:#25394a;border-color:#25394a;color:#fff}
 .btn.star{background:#fff4d1;border-color:#efd27a}
@@ -361,6 +362,8 @@ svg.darrows{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
 .srctag{font-size:10.5px;font-weight:700;border:1px solid #c9d3da;color:#5a6670;border-radius:4px;padding:0 5px;white-space:nowrap}
 .srctag.body{border-color:#7fbf9a;color:#2e7d5b;background:#e3f1e6}
 .flowbox{margin:12px 0 10px}
+.uchubtn{display:block;margin:0 0 10px;padding:11px 14px;border-radius:12px;border:2px solid #37506d;background:radial-gradient(ellipse at 25% 40%,#376e9455,transparent 60%),radial-gradient(ellipse at 80% 60%,#684d9455,transparent 60%),#0b192b;color:#eaf1fc;font-weight:800;font-size:14px;text-align:center;text-decoration:none;letter-spacing:.04em}
+.uchubtn:hover{border-color:#6aa8ce;color:#fff}
 .mkbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
 .mkbar input{font:inherit;padding:4px 8px;border:1px solid var(--line);border-radius:6px;min-width:16em}
 .mknote{background:#fff7e6;border-radius:8px;padding:6px 10px}
@@ -514,7 +517,7 @@ svg.darrows{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
 <body>
 <header>
   <div class="wrap hrow">
-    <h1><a href="#home" data-go="home" class="homelink" title="ホームへ">ことばのわざ概念ツリー</a> <small>v15.7</small></h1>
+    <h1><a href="#home" data-go="home" class="homelink" title="ホームへ">ことばのわざ概念ツリー</a> <small>v15.9</small></h1>
     <nav class="submenu" id="setMenu" aria-label="設定"></nav>
     <span class="packbox"><span class="packlbl">読み込み中の指導計画ファイル</span><button class="packnm" id="packName" data-go="files" title="押すと、書き出す／読み込む画面へ"></button></span>
     <div class="grow"></div>
@@ -553,6 +556,7 @@ svg.darrows{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
         <li class="phli"><div class="row"><button class="tog" data-act="ph-tog" data-ph="ikasou" aria-expanded="false" aria-label="ひらく/とじる">▶</button><button class="nb rg" data-act="ph-tog" data-ph="ikasou">【いかそう】</button></div>
         <div class="phbody pd" data-phb="ikasou" hidden>言葉の使い手としての学びの実践化（言語活動）<br>例：リライト、学びから形成した考えの交流 など<div id="ikasouLA"></div></div></li>
       </ul></li></ul></div></div>
+    <a class="uchubtn" id="uchuLink" href="uchu.html" target="_blank" rel="noopener" title="わざとつながりを、4つの銀河の3D空間として別の窓で見ます">✧ ことばのわざ宇宙へ</a>
   </aside>
   <article class="detail" id="detail"></article>
 </main>
@@ -564,7 +568,7 @@ svg.darrows{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
 (()=>{
 'use strict';
 const APP_SCHEMA = 2;
-const APP_VERSION = 'v15.7';
+const APP_VERSION = 'v15.9';
 // 見出しのよび方（教師用フル版）。児童版では rec を「学びの記録」に切りかえる
 // 機能の切りかえ。教師用フル版は閲覧専用（編集・★見つけた・読み込み・書き出しを出さず、いつも埋め込みデータで開く）
 const FEATURES = {edit: false};
@@ -1941,6 +1945,9 @@ function importCsvRows(){
   [1, 2, 3, 4, 5, 6].forEach(reorder); csvIncoming = null; closeModal(); planChanged(); render();
   toast(`取り込みました（追加 ${add}・更新 ${upd}）`);
 }
+const UCHU_URL = 'https://rswebapps.github.io/kotoba-waza-tree/uchu.html';   // 概念宇宙（3Dビューワー）。GitHub Pages では同じ場所の uchu.html を開く
+const PROMPT_URL = 'https://rswebapps.github.io/kotoba-waza-tree/prompts/shidou_keikaku_prompt.md';   // 指導計画ファイル作成プロンプト（ユーザー用）。GitHub に置き、アプリを作り直さずに更新できるようにする
+(() => { const a = document.getElementById('uchuLink'); if (a && location.protocol === 'https:' && !/github\.io$/.test(location.hostname)) a.href = UCHU_URL; })();
 const AI_PROMPT = `あなたは小学校国語の指導計画づくりを手伝います。添付した資料（学校の年間指導計画や、指導事項の配当表など）を読み、次の様式のCSVに転記してください。
 
 【様式】1行目は次の見出しをそのまま使い、2行目から1行に1単元を書きます。
@@ -1969,7 +1976,8 @@ function renderFiles(el){
     <div class="mkbar">${PACK ? `<label>名前 <input id="mkPackName" value="${esc(PACK.meta && PACK.meta.name || '')}"></label><span class="info">${PACK.texts.length}単元</span>` : '<span class="info">指導計画はまだありません。</span>'}
     <span class="grow"></span>${PACK ? '' : '<button class="btn" data-act="mk-new">新しく作る</button>'}<button class="btn" data-act="mk-import">読み込む</button>${PACK ? '<button class="btn" data-act="mk-export">書き出す</button><button class="btn danger" data-act="mk-clear">このブラウザから消す</button>' : ''}</div>
     ${PACK && PACK.meta && PACK.meta.note ? `<p class="info mknote">${esc(PACK.meta.note)}</p>` : ''}
-    ${(pv => pv ? `<div class="mkbar"><span class="info">${esc(fmtAt(pv.at))} の${esc(pv.why)}の前の指導計画（${esc(pv.pack.meta && (pv.pack.meta.file || pv.pack.meta.name) || '')}・${pv.pack.texts.length}単元）が残っています。</span><span class="grow"></span><button class="btn" data-act="pk-undo">元に戻す</button></div>` : '')(loadPrev())}</section>`;
+    ${(pv => pv ? `<div class="mkbar"><span class="info">${esc(fmtAt(pv.at))} の${esc(pv.why)}の前の指導計画（${esc(pv.pack.meta && (pv.pack.meta.file || pv.pack.meta.name) || '')}・${pv.pack.texts.length}単元）が残っています。</span><span class="grow"></span><button class="btn" data-act="pk-undo">元に戻す</button></div>` : '')(loadPrev())}
+    <div class="mkbar"><span class="info">教科書会社の年間指導計画から .sdkk を作るときは、生成AIに資料と一緒にこのプロンプトを渡します。</span><span class="grow"></span><a class="btn" href="${PROMPT_URL}" download="shidou_keikaku_prompt.md" target="_blank" rel="noopener">プロンプトをダウンロード</a></div></section>`;
   h += `<section class="sec"><h3>表計算の様式（CSV）</h3><p class="info">1行に1単元の表です（${esc(CSV_HEAD.join('／'))}）。Excelで開いて書き、CSVのまま保存して取り込みます。取り込むときに学習指導要領との整合を確かめ、合わない行を知らせます。同じ学年・同じ単元名の行は、今の単元を書きかえます。</p>
     <div class="mkbar"><button class="btn" data-act="csv-template">様式を書き出す（${PACK ? '今の指導計画入り' : '空'}）</button><button class="btn" data-act="csv-import">CSVを取り込む</button></div>
     <details class="aip"><summary>資料からCSVを作るためのプロンプト（AIに資料と一緒に渡す）</summary><textarea class="out" id="aiPrompt" readonly rows="14">${esc(AI_PROMPT)}</textarea><p><button class="btn sm" data-act="copy-prompt">プロンプトをコピー</button></p></details></section>`;
