@@ -517,7 +517,7 @@ svg.darrows{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
 <body>
 <header>
   <div class="wrap hrow">
-    <h1><a href="#home" data-go="home" class="homelink" title="ホームへ">ことばのわざ概念ツリー</a> <small>v15.9</small></h1>
+    <h1><a href="#home" data-go="home" class="homelink" title="ホームへ">ことばのわざ概念ツリー</a> <small>v16.0</small></h1>
     <nav class="submenu" id="setMenu" aria-label="設定"></nav>
     <span class="packbox"><span class="packlbl">読み込み中の指導計画ファイル</span><button class="packnm" id="packName" data-go="files" title="押すと、書き出す／読み込む画面へ"></button></span>
     <div class="grow"></div>
@@ -525,8 +525,8 @@ svg.darrows{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
     <button class="btn" data-act="toggle-edit" id="editBtn">編集</button>
     <button class="btn" data-act="import">読み込み</button>
     <button class="btn" data-act="export">書き出し</button>
-    <input type="file" id="packIn" accept=".json,.sdkk,.wzpack" hidden><input type="file" id="learnIn" accept=".json,.wzlst" hidden><input type="file" id="csvIn" accept=".csv,text/csv" hidden>
-    <input type="file" id="fileIn" accept="application/json,.json">
+    <input type="file" id="packIn" accept=".json,.sdkk,.wzpack,.txt,text/plain" hidden><input type="file" id="learnIn" accept=".json,.wzlst,.txt,text/plain" hidden><input type="file" id="csvIn" accept=".csv,text/csv" hidden>
+    <input type="file" id="fileIn" accept="application/json,.json,.txt,text/plain">
   </div>
   <div class="editbar" id="editBar" hidden><div class="wrap">編集モード：ノード・つながり・文章・出現記録を追加・修正できます。変更はこのブラウザに自動保存されます。残すときは「書き出し」で JSON を保存してください。　<button class="btn sm danger" data-act="reset">最初のデータに戻す</button></div></div>
 </header>
@@ -556,19 +556,20 @@ svg.darrows{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
         <li class="phli"><div class="row"><button class="tog" data-act="ph-tog" data-ph="ikasou" aria-expanded="false" aria-label="ひらく/とじる">▶</button><button class="nb rg" data-act="ph-tog" data-ph="ikasou">【いかそう】</button></div>
         <div class="phbody pd" data-phb="ikasou" hidden>言葉の使い手としての学びの実践化（言語活動）<br>例：リライト、学びから形成した考えの交流 など<div id="ikasouLA"></div></div></li>
       </ul></li></ul></div></div>
-    <a class="uchubtn" id="uchuLink" href="uchu.html" target="_blank" rel="noopener" title="わざとつながりを、4つの銀河の3D空間として別の窓で見ます">✧ ことばのわざ宇宙へ</a>
+    <a class="uchubtn" id="uchuLink" href="#" title="わざとつながりを、4つの銀河の3D空間として別の窓で見ます">✧ ことばのわざ宇宙へ</a>
   </aside>
   <article class="detail" id="detail"></article>
 </main>
 <p class="foot" id="foot"></p>
 <div id="modalRoot"></div>
 
+<script id="uchuTpl" type="application/json">UCHU_TEMPLATE</script>
 <script id="defaultData" type="application/json">DEFAULT_DATA</script>
 <script>
 (()=>{
 'use strict';
 const APP_SCHEMA = 2;
-const APP_VERSION = 'v15.9';
+const APP_VERSION = 'v16.0';
 // 見出しのよび方（教師用フル版）。児童版では rec を「学びの記録」に切りかえる
 // 機能の切りかえ。教師用フル版は閲覧専用（編集・★見つけた・読み込み・書き出しを出さず、いつも埋め込みデータで開く）
 const FEATURES = {edit: false};
@@ -1945,9 +1946,37 @@ function importCsvRows(){
   [1, 2, 3, 4, 5, 6].forEach(reorder); csvIncoming = null; closeModal(); planChanged(); render();
   toast(`取り込みました（追加 ${add}・更新 ${upd}）`);
 }
-const UCHU_URL = 'https://rswebapps.github.io/kotoba-waza-tree/uchu.html';   // 概念宇宙（3Dビューワー）。GitHub Pages では同じ場所の uchu.html を開く
 const PROMPT_URL = 'https://rswebapps.github.io/kotoba-waza-tree/prompts/shidou_keikaku_prompt.md';   // 指導計画ファイル作成プロンプト（ユーザー用）。GitHub に置き、アプリを作り直さずに更新できるようにする
-(() => { const a = document.getElementById('uchuLink'); if (a && location.protocol === 'https:' && !/github\.io$/.test(location.hostname)) a.href = UCHU_URL; })();
+// ことばのわざ宇宙：index.html の中に宇宙の画面を持ち、いま開いているデータから組み立てて別の窓に出す（オフラインでも動く）
+function uchuGraph(){
+  const restore = n => { const o = {...n}; ['demo', 'example', 'operation', 'dep', 'source', 'label_lm', 'stages'].forEach(f => { const k = n.id + '|' + f; if (BASEV.has(k)) o[f] = BASEV.get(k); }); return o; };   // 統合したわざは、ツリーで切り替える前の値に戻す
+  let noOrder = new Set(); try { noOrder = new Set(JSON.parse(DEFAULT).nodes.filter(n => n.order === undefined).map(n => n.id)); } catch (e) {}   // 読み込み時に補った並び順（999）は外し、単体の uchu.html と同じ配置にする
+  const seen = new Set(), nodes = [];
+  [...(D.allNodes || []), ...(D.nodes || [])].forEach(n => { if (seen.has(n.id)) return; seen.add(n.id); const o = restore(n); if (noOrder.has(n.id) && o.order === 999) delete o.order; nodes.push(o); });
+  const es = new Set(), edges = [];
+  [...(D.allEdges || []), ...(D.edges || [])].forEach(e => { if (es.has(e.id)) return; es.add(e.id); edges.push(e); });
+  const galaxy = n => n.axis === 'k' ? 'kotoba' : n.axis === 'n' ? 'sosa' : (n.tree || 'setsumei');
+  const srefs = n => { const m = new Map(), add = (i, w) => { if (!m.has(i)) m.set(i, []); if (!m.get(i).includes(w)) m.get(i).push(w); };
+    (n.basis_refs || []).forEach(r => add(r, '概念の根拠')); (n.stages || []).forEach(st => (st.basis_refs || []).forEach(r => add(r, st.band + '段階')));
+    return [...m].map(([id, w]) => ({id, where: w.sort((a, b) => ((a === '概念の根拠') - (b === '概念の根拠')) || (a < b ? -1 : a > b ? 1 : 0))})); };
+  const g = nodes.map(n => ({...n, galaxy: galaxy(n), source_refs: srefs(n)}));
+  const toolUses = nodes.flatMap(n => (n.tools || []).map(t => ({from: n.id, to: t.id})));
+  return {nodes: g, edges, toolUses, trees: D.trees || [], refs: D.refs || [], lits: D.lits || [],
+    source: {version: APP_VERSION, nodeCount: g.length, edgeCount: edges.length, toolUseCount: toolUses.length, based_on: 'index.html', viewer_updated: ymd()}};
+}
+function openUchu(){
+  let html;
+  try {
+    const tpl = JSON.parse(document.getElementById('uchuTpl').textContent);
+    const d = new Date(), day = d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
+    html = tpl.split('__VER__').join(APP_VERSION).split('__DATE__').join(day).replace('GRAPH_DATA', () => JSON.stringify(uchuGraph()).replace(/<\//g, '<\\/'));
+  } catch (e) { console.error(e); toast('宇宙の画面を組み立てられませんでした'); return; }
+  const url = URL.createObjectURL(new Blob([html], {type: 'text/html'}));
+  const w = window.open(url, '_blank');
+  if (!w) { toast('別の窓を開けませんでした。ポップアップを許可してください'); URL.revokeObjectURL(url); return; }
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+document.getElementById('uchuLink')?.addEventListener('click', e => { e.preventDefault(); openUchu(); });
 const AI_PROMPT = `あなたは小学校国語の指導計画づくりを手伝います。添付した資料（学校の年間指導計画や、指導事項の配当表など）を読み、次の様式のCSVに転記してください。
 
 【様式】1行目は次の見出しをそのまま使い、2行目から1行に1単元を書きます。
@@ -1972,9 +2001,9 @@ const AI_PROMPT = `あなたは小学校国語の指導計画づくりを手伝�
 ・出力はCSVだけをコードブロックで示す`;
 function renderFiles(el){
   let h = screenTop(el, 'make files', 'リストを書き出す／読み込む', '指導計画ファイル（.sdkk）、表計算の様式（CSV）、学級版とやりとりするわざリスト（.wzlst）を扱います。');
-  h += `<section class="sec"><h3>指導計画ファイル（.sdkk）</h3><p class="info">学年ごとの単元・指導事項・わざの結びつき、追加したわざ、学級で見つけたわざを、1つのファイルにまとめたものです。このブラウザに保存されているので、ほかの端末で使うときや残すときは書き出します。</p>
+  h += `<section class="sec"><h3>指導計画ファイル（.sdkk）</h3><p class="info">学年ごとの単元・指導事項・わざの結びつき、追加したわざ、学級で見つけたわざを、1つのファイルにまとめたものです。このブラウザに保存されているので、ほかの端末で使うときや残すときは書き出します。学校のネットワークなどで .sdkk のファイルがはじかれるときは、テキスト（.txt）で書き出してください。中身は同じで、.sdkk・.txt・.json のどれでも読み込めます。</p>
     <div class="mkbar">${PACK ? `<label>名前 <input id="mkPackName" value="${esc(PACK.meta && PACK.meta.name || '')}"></label><span class="info">${PACK.texts.length}単元</span>` : '<span class="info">指導計画はまだありません。</span>'}
-    <span class="grow"></span>${PACK ? '' : '<button class="btn" data-act="mk-new">新しく作る</button>'}<button class="btn" data-act="mk-import">読み込む</button>${PACK ? '<button class="btn" data-act="mk-export">書き出す</button><button class="btn danger" data-act="mk-clear">このブラウザから消す</button>' : ''}</div>
+    <span class="grow"></span>${PACK ? '' : '<button class="btn" data-act="mk-new">新しく作る</button>'}<button class="btn" data-act="mk-import">読み込む</button>${PACK ? '<button class="btn" data-act="mk-export">書き出す</button><button class="btn" data-act="mk-export-txt" title="学校のネットワークなどで .sdkk のファイルがはじかれるときに使います。中身は .sdkk と同じです">テキストで書き出す（.txt）</button><button class="btn danger" data-act="mk-clear">このブラウザから消す</button>' : ''}</div>
     ${PACK && PACK.meta && PACK.meta.note ? `<p class="info mknote">${esc(PACK.meta.note)}</p>` : ''}
     ${(pv => pv ? `<div class="mkbar"><span class="info">${esc(fmtAt(pv.at))} の${esc(pv.why)}の前の指導計画（${esc(pv.pack.meta && (pv.pack.meta.file || pv.pack.meta.name) || '')}・${pv.pack.texts.length}単元）が残っています。</span><span class="grow"></span><button class="btn" data-act="pk-undo">元に戻す</button></div>` : '')(loadPrev())}
     <div class="mkbar"><span class="info">教科書会社の年間指導計画から .sdkk を作るときは、生成AIに資料と一緒にこのプロンプトを渡します。</span><span class="grow"></span><a class="btn" href="${PROMPT_URL}" download="shidou_keikaku_prompt.md" target="_blank" rel="noopener">プロンプトをダウンロード</a></div></section>`;
@@ -1989,16 +2018,16 @@ function renderFiles(el){
 async function saveTextFile(base, ext, txt, okMsg, title){
   let fname = base + ext;
   let dl = null; try { dl = window.claude && typeof window.claude.use === 'function' ? await window.claude.use('downloads') : null; } catch {}
-  if (dl) { if (!['.json', '.csv', '.txt'].includes(ext)) fname += '.json'; try { await dl.save({filename: fname, data: txt}); toast(okMsg); return; } catch (e) { if (e && e.code === 'declined') return; } }
+  if (dl) { if (!['.json', '.csv', '.txt'].some(x => ext.endsWith(x))) fname += '.json'; try { await dl.save({filename: fname, data: txt}); toast(okMsg); return; } catch (e) { if (e && e.code === 'declined') return; } }
   else if (!window.claude) { try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], {type: 'application/octet-stream'})); a.download = fname; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000); toast(okMsg); return; } catch {} }
   modal(`<h3>${esc(title)}</h3><p class="info">この画面ではファイルを保存できないので、下の文字をコピーして、「${esc(fname)}」という名前で保存してください。</p><textarea class="out" id="outTxt" readonly>${esc(txt.replace(/^﻿/, ''))}</textarea><div class="mfoot"><button class="btn" data-act="close">閉じる</button><button class="btn" data-act="copy-out">コピー</button></div>`);
 }
 const ymd = () => { const d0 = new Date(); return `${d0.getFullYear()}${String(d0.getMonth() + 1).padStart(2, '0')}${String(d0.getDate()).padStart(2, '0')}`; };
-async function exportPack(){
+async function exportPack(ext = '.sdkk'){   // ext：'.sdkk' か、ネットワークで独自の拡張子がはじかれるとき用の '.sdkk.txt'（中身は同じ）
   if (!PACK) return;
   const nm = document.getElementById('mkPackName'); if (nm) { PACK.meta.name = nm.value.trim() || PACK.meta.name; storePack(); }
-  PACK.meta.file = 'shidou_keikaku_' + ymd() + '.sdkk'; storePack(); renderDomain();
-  await saveTextFile('shidou_keikaku_' + ymd(), '.sdkk', JSON.stringify(PACK, null, 1), '指導計画を保存しました', '指導計画を書き出す');
+  PACK.meta.file = 'shidou_keikaku_' + ymd() + ext; storePack(); renderDomain();
+  await saveTextFile('shidou_keikaku_' + ymd(), ext, JSON.stringify(PACK, null, 1), '指導計画を保存しました', '指導計画を書き出す');
 }
 function descendants(id){ const out = []; (function rec(i){ kids(i).forEach(k => { out.push(k.id); rec(k.id); }); })(id); return out; }
 
@@ -2641,6 +2670,7 @@ document.addEventListener('click', ev => {
     case 'mk-learn-yes': importLearn(); break;
     case 'mk-learn-del': { const k = t.dataset.v; PACK.learn = (PACK.learn || []).filter(L => L.cls + '|' + L.year !== k); planChanged(); render(); break; }
     case 'mk-export': exportPack(); break;
+    case 'mk-export-txt': exportPack('.sdkk.txt'); break;
     case 'pk-replace': { const x = packIncoming; packIncoming = null; closeModal(); if (!x) break; savePrev('入れかえ'); packLoadDone(x.p, '入れかえました'); break; }
     case 'pk-merge': { if (!packIncoming) break; packIncoming.plan = mergePlan(PACK, packIncoming.p); modal(packMergeHTML()); break; }
     case 'pk-merge-yes': {
