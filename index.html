@@ -517,7 +517,7 @@ svg.darrows{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
 <body>
 <header>
   <div class="wrap hrow">
-    <h1><a href="#home" data-go="home" class="homelink" title="ホームへ">ことばのわざ概念ツリー</a> <small>v16.0</small></h1>
+    <h1><a href="#home" data-go="home" class="homelink" title="ホームへ">ことばのわざ概念ツリー</a> <small>v16.1</small></h1>
     <nav class="submenu" id="setMenu" aria-label="設定"></nav>
     <span class="packbox"><span class="packlbl">読み込み中の指導計画ファイル</span><button class="packnm" id="packName" data-go="files" title="押すと、書き出す／読み込む画面へ"></button></span>
     <div class="grow"></div>
@@ -525,7 +525,7 @@ svg.darrows{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
     <button class="btn" data-act="toggle-edit" id="editBtn">編集</button>
     <button class="btn" data-act="import">読み込み</button>
     <button class="btn" data-act="export">書き出し</button>
-    <input type="file" id="packIn" accept=".json,.sdkk,.wzpack,.txt,text/plain" hidden><input type="file" id="learnIn" accept=".json,.wzlst,.txt,text/plain" hidden><input type="file" id="csvIn" accept=".csv,text/csv" hidden>
+    <input type="file" id="packIn" accept=".json,.sdkk,.wzpack,.txt,.csv,text/plain,text/csv" hidden><input type="file" id="learnIn" accept=".json,.wzlst,.txt,text/plain" hidden><input type="file" id="csvIn" accept=".csv,text/csv" hidden>
     <input type="file" id="fileIn" accept="application/json,.json,.txt,text/plain">
   </div>
   <div class="editbar" id="editBar" hidden><div class="wrap">編集モード：ノード・つながり・文章・出現記録を追加・修正できます。変更はこのブラウザに自動保存されます。残すときは「書き出し」で JSON を保存してください。　<button class="btn sm danger" data-act="reset">最初のデータに戻す</button></div></div>
@@ -32797,7 +32797,7 @@ svg.darrows{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
 (()=>{
 'use strict';
 const APP_SCHEMA = 2;
-const APP_VERSION = 'v16.0';
+const APP_VERSION = 'v16.1';
 // 見出しのよび方（教師用フル版）。児童版では rec を「学びの記録」に切りかえる
 // 機能の切りかえ。教師用フル版は閲覧専用（編集・★見つけた・読み込み・書き出しを出さず、いつも埋め込みデータで開く）
 const FEATURES = {edit: false};
@@ -34229,9 +34229,10 @@ const AI_PROMPT = `あなたは小学校国語の指導計画づくりを手伝�
 ・出力はCSVだけをコードブロックで示す`;
 function renderFiles(el){
   let h = screenTop(el, 'make files', 'リストを書き出す／読み込む', '指導計画ファイル（.sdkk）、表計算の様式（CSV）、学級版とやりとりするわざリスト（.wzlst）を扱います。');
-  h += `<section class="sec"><h3>指導計画ファイル（.sdkk）</h3><p class="info">学年ごとの単元・指導事項・わざの結びつき、追加したわざ、学級で見つけたわざを、1つのファイルにまとめたものです。このブラウザに保存されているので、ほかの端末で使うときや残すときは書き出します。学校のネットワークなどで .sdkk のファイルがはじかれるときは、テキスト（.txt）で書き出してください。中身は同じで、.sdkk・.txt・.json のどれでも読み込めます。</p>
+  h += `<section class="sec"><h3>指導計画ファイル（.sdkk）</h3><p class="info">学年ごとの単元・指導事項・わざの結びつき、追加したわざ、学級で見つけたわざを、1つのファイルにまとめたものです。このブラウザに保存されているので、ほかの端末で使うときや残すときは書き出します。学校のネットワークなどで .sdkk のファイルがはじかれるときは、テキスト（.txt）・CSV・スプレッドシートへの貼り付けで運べます。どれも中身は同じで、「読み込む」（.sdkk・.txt・.csv・.json）か「貼り付けて読み込む」で戻せます。</p>
     <div class="mkbar">${PACK ? `<label>名前 <input id="mkPackName" value="${esc(PACK.meta && PACK.meta.name || '')}"></label><span class="info">${PACK.texts.length}単元</span>` : '<span class="info">指導計画はまだありません。</span>'}
-    <span class="grow"></span>${PACK ? '' : '<button class="btn" data-act="mk-new">新しく作る</button>'}<button class="btn" data-act="mk-import">読み込む</button>${PACK ? '<button class="btn" data-act="mk-export">書き出す</button><button class="btn" data-act="mk-export-txt" title="学校のネットワークなどで .sdkk のファイルがはじかれるときに使います。中身は .sdkk と同じです">テキストで書き出す（.txt）</button><button class="btn danger" data-act="mk-clear">このブラウザから消す</button>' : ''}</div>
+    <span class="grow"></span>${PACK ? '' : '<button class="btn" data-act="mk-new">新しく作る</button>'}<button class="btn" data-act="mk-import">読み込む</button><button class="btn" data-act="mk-paste" title="スプレッドシートからコピーした指導計画を貼り付けて読み込みます">貼り付けて読み込む</button>${PACK ? '<button class="btn" data-act="mk-export">書き出す</button><button class="btn danger" data-act="mk-clear">このブラウザから消す</button>' : ''}</div>
+    ${PACK ? '<div class="mkbar"><span class="info">.sdkk がはじかれるとき：</span><button class="btn" data-act="mk-export-txt" title="中身は .sdkk と同じです">テキスト（.txt）</button><button class="btn" data-act="mk-export-csv" title="表計算のファイル（CSV）にして書き出します。開いて直したり保存し直したりせず、そのまま読み込んでください">CSV</button><button class="btn" data-act="mk-copy-sheet" title="Google スプレッドシートなどのA1に貼り付けられる形でコピーします。戻すときは、その行をすべてコピーして「貼り付けて読み込む」へ">スプレッドシート用にコピー</button></div>' : ''}
     ${PACK && PACK.meta && PACK.meta.note ? `<p class="info mknote">${esc(PACK.meta.note)}</p>` : ''}
     ${(pv => pv ? `<div class="mkbar"><span class="info">${esc(fmtAt(pv.at))} の${esc(pv.why)}の前の指導計画（${esc(pv.pack.meta && (pv.pack.meta.file || pv.pack.meta.name) || '')}・${pv.pack.texts.length}単元）が残っています。</span><span class="grow"></span><button class="btn" data-act="pk-undo">元に戻す</button></div>` : '')(loadPrev())}
     <div class="mkbar"><span class="info">教科書会社の年間指導計画から .sdkk を作るときは、生成AIに資料と一緒にこのプロンプトを渡します。</span><span class="grow"></span><a class="btn" href="${PROMPT_URL}" download="shidou_keikaku_prompt.md" target="_blank" rel="noopener">プロンプトをダウンロード</a></div></section>`;
@@ -34251,6 +34252,41 @@ async function saveTextFile(base, ext, txt, okMsg, title){
   modal(`<h3>${esc(title)}</h3><p class="info">この画面ではファイルを保存できないので、下の文字をコピーして、「${esc(fname)}」という名前で保存してください。</p><textarea class="out" id="outTxt" readonly>${esc(txt.replace(/^﻿/, ''))}</textarea><div class="mfoot"><button class="btn" data-act="close">閉じる</button><button class="btn" data-act="copy-out">コピー</button></div>`);
 }
 const ymd = () => { const d0 = new Date(); return `${d0.getFullYear()}${String(d0.getMonth() + 1).padStart(2, '0')}${String(d0.getDate()).padStart(2, '0')}`; };
+// 指導計画をCSV・スプレッドシートで運ぶ：ネットワークで .sdkk や .txt がはじかれるとき用。
+// 中身（JSON）を UTF-8 → base64 にして、1行1セルの「kwz1:番号/全体:…」に分ける（1セル20000字。スプレッドシートの1セルの上限 50000字、Excel の 32767字より小さい）。
+// 読むときは、文字の中から kwz1: の断片を探してつなぐので、CSV・スプレッドシートからの貼り付け・JSON のどれでもよい。
+const PACK_CHUNK = 20000;
+function packToChunks(p){
+  const bytes = new TextEncoder().encode(JSON.stringify(p)); let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  const b = btoa(bin), n = Math.ceil(b.length / PACK_CHUNK);
+  return Array.from({length: n}, (_, i) => `kwz1:${i + 1}/${n}:` + b.slice(i * PACK_CHUNK, (i + 1) * PACK_CHUNK));
+}
+function packFromText(txt){
+  txt = String(txt || '').replace(/^\ufeff/, '');
+  const re = /kwz1:(\d+)\/(\d+):([A-Za-z0-9+\/=]+)/g, parts = {}; let m, n = 0;
+  while ((m = re.exec(txt))) { n = +m[2]; parts[+m[1]] = m[3]; }
+  if (!n) return JSON.parse(txt.trim());
+  for (let i = 1; i <= n; i++) if (!parts[i]) throw Error(`${n}行のうち ${i}行目が見つかりません（全部の行をそろえてください）`);
+  const bin = atob(Array.from({length: n}, (_, i) => parts[i + 1]).join(''));
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+async function exportPackCsv(){
+  if (!PACK) return;
+  PACK.meta.file = 'shidou_keikaku_' + ymd() + '.sdkk.csv'; storePack(); renderDomain();
+  const rows = ['ことばのわざ指導計画（.sdkk）。この表は直さず、そのままアプリで読み込んでください', ...packToChunks(PACK)];
+  await saveTextFile('shidou_keikaku_' + ymd(), '.sdkk.csv', '\ufeff' + rows.join('\r\n') + '\r\n', '指導計画をCSVで保存しました', '指導計画をCSVで書き出す');
+}
+async function copyPackForSheet(){
+  if (!PACK) return;
+  const txt = packToChunks(PACK).join('\n');
+  try { await navigator.clipboard.writeText(txt); toast(`コピーしました（${txt.split('\n').length}行）。スプレッドシートのA1を選んで貼り付けてください`); }
+  catch (e) { modal(`<h3>スプレッドシート用にコピー</h3><p class="info">自動でコピーできなかったので、下の文字をすべて選んでコピーし、スプレッドシートのA1に貼り付けてください。</p><textarea class="out" readonly>${esc(txt)}</textarea><div class="mfoot"><button class="btn" data-act="close">閉じる</button></div>`); }
+}
+function pastePackBox(){
+  modal(`<h3>貼り付けて読み込む</h3><p class="info">スプレッドシートで、指導計画の行（kwz1: で始まるセル）をすべて選んでコピーし、下に貼り付けます。.sdkk の中身（{ で始まる文字）をそのまま貼り付けてもかまいません。</p><textarea class="out" id="pastePack" placeholder="ここに貼り付け"></textarea><div class="mfoot"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="pk-paste-go">読み込む</button></div>`);
+}
 async function exportPack(ext = '.sdkk'){   // ext：'.sdkk' か、ネットワークで独自の拡張子がはじかれるとき用の '.sdkk.txt'（中身は同じ）
   if (!PACK) return;
   const nm = document.getElementById('mkPackName'); if (nm) { PACK.meta.name = nm.value.trim() || PACK.meta.name; storePack(); }
@@ -34728,8 +34764,10 @@ function importLearn(){
 }
 document.getElementById('csvIn').addEventListener('change', async ev => {
   const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
+  const raw = await f.text();
+  if (/kwz1:\d+\/\d+:/.test(raw)) { importPackText(raw, f.name); return; }   // 指導計画をCSVにしたものは、指導計画として読み込む
   try {
-    const rows = parseCsv(await f.text()); if (rows.length < 2) throw Error('見出しと、1行以上の単元が要ります');
+    const rows = parseCsv(raw); if (rows.length < 2) throw Error('見出しと、1行以上の単元が要ります');
     csvIncoming = checkCsv(rows);
     const {errors, ok} = csvIncoming;
     modal(`<h3>CSVを取り込む</h3><p class="info">「${esc(f.name)}」：取り込める行 ${ok.length}、合わない行 ${errors.length}</p>
@@ -34753,8 +34791,12 @@ document.getElementById('learnIn').addEventListener('change', async ev => {
 });
 document.getElementById('packIn').addEventListener('change', async ev => {
   const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
+  importPackText(await f.text(), f.name);
+});
+function importPackText(txt, fname){
+  const f = {name: fname};
   try {
-    const p = JSON.parse((await f.text()).replace(/^﻿/, ''));
+    const p = packFromText(txt);
     if (!packOk(p)) throw Error('指導計画ファイル（.sdkk）の形ではありません');
     p.meta = p.meta || {}; p.meta.file = f.name; toSdkk(p);
     if (!PACK) { confirmBox(`「${f.name}」（${p.texts.length}単元）を読み込みます。`, () => packLoadDone(p, '読み込みました')); return; }
@@ -34765,7 +34807,7 @@ document.getElementById('packIn').addEventListener('change', async ev => {
       <p class="info">どちらでも、読み込む前の指導計画はこのブラウザに1つだけ残り、元に戻せます。</p>
       <div class="mfoot"><button class="btn" data-act="close">やめる</button><button class="btn danger" data-act="pk-replace">入れかえる</button><button class="btn primary" data-act="pk-merge">引き継いで更新する</button></div>`);
   } catch (e) { toast('読み込めませんでした：' + e.message); }
-});
+}
 document.getElementById('fileIn').addEventListener('change', async ev => {
   const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
   try {
@@ -34899,6 +34941,10 @@ document.addEventListener('click', ev => {
     case 'mk-learn-del': { const k = t.dataset.v; PACK.learn = (PACK.learn || []).filter(L => L.cls + '|' + L.year !== k); planChanged(); render(); break; }
     case 'mk-export': exportPack(); break;
     case 'mk-export-txt': exportPack('.sdkk.txt'); break;
+    case 'mk-export-csv': exportPackCsv(); break;
+    case 'mk-copy-sheet': copyPackForSheet(); break;
+    case 'mk-paste': pastePackBox(); break;
+    case 'pk-paste-go': { const v = (document.getElementById('pastePack') || {}).value || ''; if (!v.trim()) { toast('貼り付けた文字がありません'); break; } closeModal(); importPackText(v, '貼り付けた指導計画'); break; }
     case 'pk-replace': { const x = packIncoming; packIncoming = null; closeModal(); if (!x) break; savePrev('入れかえ'); packLoadDone(x.p, '入れかえました'); break; }
     case 'pk-merge': { if (!packIncoming) break; packIncoming.plan = mergePlan(PACK, packIncoming.p); modal(packMergeHTML()); break; }
     case 'pk-merge-yes': {

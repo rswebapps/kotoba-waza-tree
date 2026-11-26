@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ことばのわざ概念宇宙 __VER__ — 四銀河3Dビューワー</title>
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root{color-scheme:dark;--bg:#060e1c;--ink:#eaf1fc;--dim:#95a7c0;--edge:#273952;--panel:#0b192bdd;--p:#b5a1f7;--s:#71bfff;--l:#63ddcd;--t:#f38a96;--e:#f7c17b;--f:#f47fb4;--n:#c4e987;--k:#f3d789}
+*{box-sizing:border-box}html,body{height:100%;margin:0;font-family:system-ui,-apple-system,"Yu Gothic",Meiryo,sans-serif;background:var(--bg);color:var(--ink)}
+body{overflow:hidden}canvas{display:block;width:100vw;height:100vh;cursor:grab;touch-action:none}canvas.dragging{cursor:grabbing}
+.glow{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 23% 56%, #376e9420, transparent 32%), radial-gradient(ellipse at 77% 55%,#684d9421,transparent 34%),linear-gradient(180deg,transparent 65%,#020817aa)}
+.hud{position:fixed;top:18px;left:18px;z-index:5;width:min(354px,calc(100vw - 36px));max-height:calc(100vh - 36px);overflow:auto;scrollbar-width:thin;background:var(--panel);backdrop-filter:blur(16px);border:1px solid #37506d99;border-radius:18px;padding:16px 16px 14px;box-shadow:0 24px 66px #0008}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:12px}.logo{width:35px;height:35px;border:1px solid #5ea7bd80;border-radius:12px;display:grid;place-items:center;color:#80e2e6;font-size:24px;background:#25587833;flex-shrink:0}
+.brand h1{font-size:17px;line-height:1.35;margin:0;letter-spacing:.02em}.brand small{font-size:10.5px;color:#8aa9c0;letter-spacing:.12em;font-weight:750}
+.intro{font-size:12px;line-height:1.65;color:#b1c2d9;margin:0 0 14px}
+.statbar{display:flex;gap:8px;margin-bottom:12px}.stat{flex:1;border:1px solid #253b54;border-radius:10px;padding:7px 8px;background:#10243a55}.stat b{display:block;font-size:17px;font-variant-numeric:tabular-nums}.stat span{font-size:10px;color:#8ca6c1}
+.section{margin-top:15px;border-top:1px solid #243a55;padding-top:12px}.section h2{margin:0 0 9px;font-size:11px;color:#99b5ce;letter-spacing:.11em}
+.segment{display:flex;gap:5px;flex-wrap:wrap}.segment button,.actions button,.chipbtn{padding:7px 10px;color:#b9cde1;background:#12243b;border:1px solid #344b66;border-radius:9px;font-size:12px;font-weight:680;cursor:pointer}
+.segment button.active,.actions button.active{background:#1e4863;border-color:#6aa8ce;color:#fff}.segment button:hover,.actions button:hover,.chipbtn:hover{border-color:#7ba8c7}
+.search{position:relative}input[type=search]{width:100%;outline:none;border-radius:10px;border:1px solid #344c69;color:#f4f8ff;background:#081728;padding:10px 12px;font:inherit;font-size:13px}input[type=search]:focus{border-color:#8cbedb;box-shadow:0 0 0 2px #6fbaff22}#results{max-height:154px;overflow:auto;margin-top:4px}#results button{display:block;width:100%;border:0;border-bottom:1px solid #20354a;background:transparent;text-align:left;color:#d7e6f8;font-size:12px;padding:6px 5px;cursor:pointer}#results button:hover{background:#1c3548}#results button span{float:right;color:#6f8daa;font-size:10px}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:9px 8px}.checks label{font-size:12px;display:flex;align-items:center;gap:7px;color:#c4d3e6;cursor:pointer}.checks input{accent-color:#5cbcc6}
+.legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 2px}.legend label{font-size:11px;color:#b6c7da;display:flex;align-items:center;gap:5px}.swatch{width:9px;height:9px;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px currentColor}
+.linelegend{display:flex;flex-wrap:wrap;gap:7px 13px;margin-top:10px}.linelegend span{display:flex;gap:6px;align-items:center;font-size:10.5px;color:#a3b9d0}.linelegend i{width:18px;height:3px;border-radius:9px}
+.actions{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 0}
+.tiny{font-size:11px;line-height:1.7;color:#7896b2;margin:10px 0 0}.meter{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:11px;color:#a7bdd2}.meter input{width:100%;accent-color:#7bc9dc}.meter output{width:26px;text-align:right;color:#d9e9f5}
+.detail{position:fixed;right:18px;bottom:18px;z-index:6;width:min(350px,calc(100vw - 36px));background:#0c1c30eb;backdrop-filter:blur(18px);border:1px solid #395575;border-radius:16px;box-shadow:0 12px 45px #0008;padding:14px 16px 13px;max-height:min(66vh,520px);overflow:auto;scrollbar-width:thin}
+.detail[hidden]{display:none}.detail .x{position:absolute;right:8px;top:9px;background:none;border:0;color:#b5c9df;font-size:19px;cursor:pointer}
+.detail .kind{font-size:11px;color:#9fb7ce;margin-bottom:2px}.detail h3{font-size:19px;line-height:1.45;margin:3px 19px 10px 0}.kv{display:grid;grid-template-columns:75px 1fr;gap:5px 9px;font-size:12px;margin:11px 0}.kv dt{color:#91a9c3}.kv dd{margin:0;color:#ebf3ff;overflow-wrap:anywhere}.detail p{font-size:12px;line-height:1.75;color:#afc5df;margin:9px 0 0}.detail strong{color:#eafaff}
+/* Source citations are surfaced on demand without altering concept navigation. */
+.citebar{display:flex;flex-wrap:wrap;gap:7px;margin:11px 0 7px;border-top:1px solid #29465b;padding-top:10px}
+.citewrap{max-width:100%;flex:1 1 100%}
+.citewrap summary{list-style:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;padding:5px 11px;background:#173c43;border:1px solid #489393;border-radius:999px;font-size:11.5px;font-weight:750;color:#c9fbf5;user-select:none}
+.citewrap.literature summary{background:#293247;border-color:#8b86bd;color:#dedaff}
+.citewrap summary::-webkit-details-marker{display:none}
+.citewrap summary:before{content:'▸';font-size:11px}
+.citewrap[open] summary:before{content:'▾'}
+.citecount{padding:1px 6px;border-radius:99px;background:#ffffff19;font-size:11px}
+.citepanel{margin:8px 0 1px;padding:8px;border:1px solid #35566a;border-radius:11px;background:#071522}
+.refcard{padding:9px 8px 10px;border-bottom:1px solid #253b50}
+.refcard:last-child{border-bottom:0}
+.refhead{font-size:12px;color:#e4f5ff;font-weight:760;line-height:1.5}
+.refmeta{font-size:10.5px;color:#97b5ce;margin:4px 0;line-height:1.65;overflow-wrap:anywhere}
+.refquote{margin:7px 0 0;padding:9px 10px;background:#122a3a;border-left:3px solid #64c9b8;border-radius:0 6px 6px 0;color:#dfeefa;font-size:11.8px;white-space:pre-wrap;line-height:1.7}
+.refdesc{font-size:11.5px;color:#bfd2e5;margin-top:6px;line-height:1.65}
+.reftag{display:inline-block;margin:0 5px 3px 0;font-size:10px;color:#c3d7ea;border:1px solid #426482;border-radius:4px;padding:0 5px}
+.refurl{font-size:11px;color:#9ee3fc;word-break:break-all}
+.refurl:hover{text-decoration:underline}
+.connlist{display:flex;gap:5px;flex-wrap:wrap;margin:7px 0 0}.connlist button{background:#1a3348;border:1px solid #3b5672;border-radius:99px;font-size:10.5px;color:#dbeeff;padding:3px 8px;cursor:pointer}.connlist button:hover{border-color:#8bc2e2}
+.bottom{position:fixed;bottom:18px;left:390px;right:388px;z-index:4;display:flex;justify-content:center;gap:9px;pointer-events:none;align-items:center}.bottom span{border:1px solid #29465b;background:#081728cc;border-radius:99px;padding:8px 13px;color:#a1c4db;font-size:11px;backdrop-filter:blur(10px)}
+.toast{position:fixed;top:22px;left:50%;transform:translateX(-50%);padding:8px 17px;border:1px solid #4d6f87;background:#1a354d;color:#e3f6fd;border-radius:99px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:20}.toast.show{opacity:1}
+@media(max-width:930px){.hud{width:min(300px,calc(100vw - 30px));top:12px;left:12px;padding:12px}.detail{right:12px;bottom:12px;width:min(300px,calc(100vw - 24px))}.bottom{left:320px;right:320px}}
+@media(max-width:690px){.hud{top:8px;left:8px;width:calc(100vw - 16px);max-height:35vh;padding:11px}.brand{margin-bottom:4px}.brand h1{font-size:15px}.statbar,.intro{display:none}.section{margin-top:8px;padding-top:7px}.section h2{margin-bottom:6px}.hud .section.controls-section{display:none}.detail{bottom:7px;right:7px;width:min(320px,calc(100vw - 14px));max-height:33vh}.bottom{display:none}}
+</style></head><body>
+<canvas id="world" aria-label="概念ネットワーク3D空間"></canvas><div class="glow"></div>
+<aside class="hud">
+  <div class="brand"><div class="logo">✧</div><div><small>CONCEPT COSMOS / __VER__ · __DATE__</small><h1>ことばのわざ 概念宇宙</h1></div></div>
+  <p class="intro">__VER__の概念・根拠・関係を四つの銀河として可視化。「ことば」と「そうさ」は探究の共通のぶきであり、説明・文学の探究と往還します。</p>
+  <div class="statbar"><div class="stat"><b id="nCount">—</b><span>ノード</span></div><div class="stat"><b id="eCount">—</b><span>概念間エッジ</span></div><div class="stat"><b id="visibleCount">—</b><span>表示中</span></div></div>
+  <div class="section"><h2>表示する領域</h2><div class="segment" id="domain"><button data-d="all" class="active">宇宙全体</button><button data-d="buki">探究のぶき</button><button data-d="kotoba">ことば</button><button data-d="sosa">そうさ</button><button data-d="setsumei">説明の探究</button><button data-d="bungaku">文学の探究</button></div></div>
+  <div class="section"><h2>ノードを探す</h2><div class="search"><input type="search" id="q" placeholder="概念名を検索して接近..." autocomplete="off"><div id="results"></div></div></div>
+  <div class="section controls-section"><h2>接続・表示</h2><div class="checks">
+    <label><input id="hier" type="checkbox" checked>階層（親子）</label><label><input id="cross" type="checkbox" checked>概念間の関係</label><label><input id="toolLinks" type="checkbox">そうさの使用</label>
+    <label><input id="labels" type="checkbox" checked>概念名</label><label><input id="focusOnly" type="checkbox">選択ノード近傍</label>
+    <label><input id="auto" type="checkbox">自動回転</label><label><input id="research" type="checkbox" checked>研究ノード</label>
+  </div><div class="meter"><span>大きさ</span><input type="range" min="0.5" max="2.5" step="0.1" value="1" id="scale"><output id="scaleVal">1.0</output></div></div>
+  <div class="section controls-section"><h2>ノード色（概念領域）</h2><div class="legend">
+    <label><i class="swatch" style="color:var(--p);background:var(--p)"></i>前提</label><label><i class="swatch" style="color:var(--s);background:var(--s)"></i>構成</label><label><i class="swatch" style="color:var(--l);background:var(--l)"></i>論理／変化</label><label><i class="swatch" style="color:var(--t);background:var(--t)"></i>要旨／主題</label>
+    <label><i class="swatch" style="color:var(--e);background:var(--e)"></i>表現</label><label><i class="swatch" style="color:var(--f);background:var(--f)"></i>効果</label><label><i class="swatch" style="color:var(--n);background:var(--n)"></i>そうさ</label><label><i class="swatch" style="color:var(--k);background:var(--k)"></i>ことば</label>
+  </div><div class="linelegend"><span><i style="background:#5b82a3"></i>階層</span><span><i style="background:#ffab72"></i>方向あり →</span><span><i style="background:#60d6cc"></i>無方向 ―</span><span><i style="background:#bc96f4"></i>双方向 ↔</span></div></div>
+  <div class="actions"><button id="home">全体へ戻る</button><button id="centerOne">選択ノードへ接近</button><button id="clearSel">選択解除</button></div>
+  <p class="tiny">十字キー ↑↓：視線方向に前進・後退　←→：左右移動<br>Shift＋十字キー：高速移動　/　ドラッグ：視点を回転<br>ホイール・ピンチ：ズーム　/　クリック：概念を選択<br>ダブルクリック：接近　/　Shift＋ドラッグ：視点の中心を移動<br>球の半径 = 1.55 ＋ 0.17 × min(接続ノード数, 32)（表示倍率を適用）</p>
+</aside>
+<section class="detail" id="detail" hidden><button class="x" id="close" aria-label="閉じる">×</button><div id="detailBody"></div></section>
+<div class="bottom"><span>↑↓ 前後　←→ 左右　Shift：高速</span><span>ことば・そうさ ↔ 説明・文学の探究</span></div><div class="toast" id="toast"></div>
+<script type="application/json" id="graphdata">GRAPH_DATA</script>
+<script>
+(()=>{'use strict';
+const data=JSON.parse(document.getElementById('graphdata').textContent);
+const canvas=document.getElementById('world'), ctx=canvas.getContext('2d',{alpha:false});
+if(!ctx){alert('Canvasが利用できません');return;}
+const nodes=data.nodes,edges=data.edges,toolUses=data.toolUses||[];const lookup=new Map(nodes.map(n=>[n.id,n]));
+const refLookup=new Map((data.refs||[]).map(r=>[r.id,r]));const litLookup=new Map((data.lits||[]).map(r=>[r.id,r]));
+const axisName={p:'前提',s:'構成',l:'論理／変化',t:'要旨／主題',e:'表現',f:'効果',n:'そうさ',k:'ことば'};
+const colors={p:'#b5a1f7',s:'#71bfff',l:'#63ddcd',t:'#f38a96',e:'#f7c17b',f:'#f47fb4',n:'#c4e987',k:'#f3d789'};
+const relColors={hier:'#6287a9',arrow:'#ffab72',plain:'#60d6cc',both:'#bc96f4',tool:'#b7e68a'};
+const neighbors=new Map(nodes.map(n=>[n.id,new Set()]));
+const allLinks=[];
+function connect(a,b,type,dir='-'){if(!lookup.has(a)||!lookup.has(b))return;neighbors.get(a).add(b);neighbors.get(b).add(a);allLinks.push({from:a,to:b,type,dir});}
+for(const n of nodes){if(n.parent)connect(n.parent,n.id,'hier');}
+for(const e of edges) connect(e.from,e.to,e.dir==='->'?'arrow':e.dir==='<->'?'both':'plain',e.dir);
+// Direct usage links are derived from node.tools, not added to the concept-edge database.
+for(const e of toolUses) connect(e.from,e.to,'tool','-');
+for(const n of nodes){n.degree=neighbors.get(n.id).size;n.root=!n.parent;}
+const toolFrom=new Map(nodes.map(n=>[n.id,[]])), toolTo=new Map(nodes.map(n=>[n.id,[]]));
+for(const e of toolUses){toolFrom.get(e.from).push(e.to);toolTo.get(e.to).push(e.from);}
+const children=new Map();for(const n of nodes){if(!children.has(n.parent))children.set(n.parent,[]);children.get(n.parent).push(n);}
+for(const ch of children.values())ch.sort((a,b)=>(a.order||0)-(b.order||0)||a.id.localeCompare(b.id));
+function hnum(str){let h=2166136261;for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),16777619);}return(h>>>0)/4294967295;}
+const axOrder=['p','s','l','t','e','f'];
+// Four physically separated galaxies: two reading explorations and two shared tool reservoirs.
+const centers={setsumei:[-255,62,-110],bungaku:[255,62,-110],kotoba:[0,230,125],sosa:[0,-248,125]};
+const galaxyNames={setsumei:'説明の探究',bungaku:'文学の探究',kotoba:'ことば（知・技）',sosa:'そうさ（本文への関与）'};
+const galaxyColors={setsumei:'#56b7ec',bungaku:'#c18cfa',kotoba:'#f3d789',sosa:'#a7dd8e'};
+const axCenter={};
+for (let ti=0;ti<2;ti++) {const tree=ti===0?'setsumei':'bungaku';
+ axOrder.forEach((ax,i)=>{const ang=(i/6)*Math.PI*2 + (ti?0.25:-0.25);
+  axCenter[tree+':'+ax]=[centers[tree][0]+72*Math.cos(ang),centers[tree][1]+58*Math.sin(ang),centers[tree][2]+47*Math.sin(ang+0.5)];});}
+axCenter['shared:k']=centers.kotoba.slice();
+axCenter['shared:n']=centers.sosa.slice();
+function xyzAdd(a,b){return [a[0]+b[0],a[1]+b[1],a[2]+b[2]]}
+// Each node has deterministic spatial coordinates in a genuine 3-dimensional world.
+const placed=new Map();
+function place(n){if(placed.has(n.id))return placed.get(n.id);let p;
+  if(!n.parent){p=(n.galaxy==='kotoba'?axCenter['shared:k']:n.galaxy==='sosa'?axCenter['shared:n']:axCenter[n.galaxy+':'+n.axis]||[0,0,0]).slice();}
+ else {const par=lookup.get(n.parent);if(!par){p=[0,0,0]}else{
+   const center=place(par),siblings=children.get(n.parent)||[],idx=siblings.indexOf(n),count=Math.max(1,siblings.length),
+   phi=idx*2.399963+6.28318*hnum(n.parent), v=1-2*(idx+0.5)/count,
+   r=par.kind==='layer' ? 22+Math.sqrt(count)*1.15 : par.kind==='group'?13.6+Math.sqrt(count)*0.85 : 9.8+Math.sqrt(count)*0.72;
+   const spread=Math.sqrt(Math.max(0,1-v*v));const offset=[r*spread*Math.cos(phi),r*v,r*spread*Math.sin(phi)];
+   // Subtle deterministic jitter: prevents exact projection overlaps.
+   offset[0]+=(hnum(n.id+'x')-.5)*3.3;offset[1]+=(hnum(n.id+'y')-.5)*3.3;offset[2]+=(hnum(n.id+'z')-.5)*3.3;
+   p=xyzAdd(center,offset);
+ }}placed.set(n.id,p);return p;}
+for(const n of nodes)n.pos=place(n);
+let domain='all',showHier=true,showCross=true,showToolLinks=false,showLabels=true,focusOnly=false,showResearch=true,auto=false,sizeMul=1;
+let selected=null,hovered=null,yaw=-0.22,pitch=0.2,distance=1100,target=[0,-8,0],motion=null,pxratio=1,W=0,H=0,mouse={x:-1e4,y:-1e4};
+let pointerDown=null,drag=false,touches=new Map(),pinch=null;let projected=[];
+const keys=new Set();let lastFrame=performance.now();
+let seed=192837465;function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;}const stars=Array.from({length:270},()=>({x:rand(),y:rand(),r:0.4+1.1*rand(),a:0.13+0.5*rand()}));
+const $=s=>document.querySelector(s);
+function visible(n){return (domain==='all'||n.galaxy===domain||(domain==='buki'&&['kotoba','sosa'].includes(n.galaxy))) && (showResearch||n.mode!=='研究') && (!focusOnly||!selected||n.id===selected||neighbors.get(selected).has(n.id));}
+function view(node){const dx=node.pos[0]-target[0],dy=node.pos[1]-target[1],dz=node.pos[2]-target[2];
+ const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+ const x=dx*cy-dz*sy,z=dx*sy+dz*cy,y=dy*cp-z*sp,z2=dy*sp+z*cp;return {x,y,z:z2};}
+function project(node){const a=view(node);let depth=distance-a.z;if(depth<4)return null;let f=Math.min(W*0.82,H*1.15);let sc=f/depth;return {id:node.id,n:node,x:W/2+Math.min(110,W*0.07)+a.x*sc,y:H/2-a.y*sc,rad:Math.max(1.6,(1.55+0.17*Math.min(32,node.degree))*sc*sizeMul),depth,sc};}
+function mix(c1,c2,t){const rgb=s=>[1,3,5].map(i=>parseInt(s.slice(i,i+2),16));const a=rgb(c1),b=rgb(c2);return '#'+a.map((x,i)=>Math.round(x*(1-t)+b[i]*t).toString(16).padStart(2,'0')).join('');}
+function line(a,b,type,dir,active,dim){const col=relColors[type];ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+ ctx.strokeStyle=col;ctx.globalAlpha=dim?0.04:active?0.98:type==='hier'?0.24:type==='tool'?0.15:0.45;
+ ctx.lineWidth=active?2.1:type==='hier'?0.9:type==='tool'?0.8:1.1;ctx.stroke();
+ if(active&&dir!=='-'&&type!=='hier'){const x=b.x-a.x,y=b.y-a.y,l=Math.hypot(x,y);if(l>15){const x1=b.x-x/l*(b.rad+6),y1=b.y-y/l*(b.rad+6);arrow(x1,y1,x/l,y/l,col);if(dir==='<->'){const x2=a.x+x/l*(a.rad+6),y2=a.y+y/l*(a.rad+6);arrow(x2,y2,-x/l,-y/l,col);}}}
+ ctx.globalAlpha=1;}
+function arrow(x,y,ux,uy,col){ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x+ux*6,y+uy*6);ctx.lineTo(x-ux*5-uy*4,y-uy*5+ux*4);ctx.lineTo(x-ux*5+uy*4,y-uy*5-ux*4);ctx.closePath();ctx.fill();}
+function drawNode(q){const n=q.n,hi=n.id===selected,hot=n.id===hovered,connect=selected&&(neighbors.get(selected).has(n.id));let dim=selected&&!hi&&!connect;
+ const r=q.rad,col=colors[n.axis]||'#9ac4cc';ctx.globalAlpha=dim?0.28:1;
+ if(hi||hot){ctx.beginPath();ctx.arc(q.x,q.y,r+7,0,7);ctx.strokeStyle=hi?'#ffffff':'#a6e6fc';ctx.lineWidth=hi?2:1.5;ctx.stroke();}
+ const grad=ctx.createRadialGradient(q.x-r*0.34,q.y-r*0.38,Math.max(0.5,r*0.06),q.x,q.y,Math.max(2,r));
+ grad.addColorStop(0,'#fff');grad.addColorStop(0.16,mix(col,'#ffffff',0.55));grad.addColorStop(0.62,col);grad.addColorStop(1,mix(col,'#071320',0.64));
+ ctx.fillStyle=grad;ctx.shadowColor=col;ctx.shadowBlur=hi?26:hot?19:Math.min(13,3+r*.55);ctx.beginPath();ctx.arc(q.x,q.y,r,0,7);ctx.fill();ctx.shadowBlur=0;
+ if(n.mode==='研究'){ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.setLineDash([2,3]);ctx.beginPath();ctx.arc(q.x,q.y,r+2,0,7);ctx.stroke();ctx.setLineDash([]);}
+ ctx.globalAlpha=1;
+ }
+function label(q){const n=q.n,hi=n.id===selected,hot=n.id===hovered,connect=selected&&neighbors.get(selected).has(n.id);
+ if(selected&&!hi&&!connect)return;if(!showLabels&&!hi&&!hot)return;
+ const show=hi||hot||n.kind==='layer'||(n.kind==='group'&&q.rad>=6)||q.rad>=13||distance<125;
+ if(!show)return;const lab=n.label_h||n.id;let fs=hi?15:hot?13:n.kind==='layer'?12:11;
+ if(distance>350&&!hi&&!hot&&n.kind!=='layer')return;
+ ctx.font=`${hi||n.kind!=='concept'?750:600} ${fs}px system-ui,Meiryo,sans-serif`;
+ const tw=ctx.measureText(lab).width, tx=q.x-tw/2,ty=q.y+q.rad+fs+4;
+ ctx.fillStyle='rgba(2,10,24,.7)';ctx.fillRect(tx-5,ty-fs-2,tw+10,fs+7);
+ ctx.textAlign='center';ctx.fillStyle=hi?'#fff':'#d7e5f2';ctx.shadowColor='#000';ctx.shadowBlur=4;ctx.fillText(lab,q.x,ty);ctx.shadowBlur=0;
+}
+function drawGalaxyGuides(){
+ const available=domain==='all'?Object.keys(centers):domain==='buki'?['kotoba','sosa']:[domain];
+ for(const gal of available){const center=centers[gal],o=project({id:'guide_'+gal,pos:center,degree:0});if(!o)continue;
+  const rr=Math.min(650,125*o.sc),col=galaxyColors[gal];if(rr>4){
+   const aura=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,rr);
+   aura.addColorStop(0,col+'10');aura.addColorStop(0.65,col+'08');aura.addColorStop(1,col+'00');
+   ctx.fillStyle=aura;ctx.beginPath();ctx.arc(o.x,o.y,rr,0,Math.PI*2);ctx.fill();
+   ctx.globalAlpha=0.2;ctx.setLineDash([5,9]);ctx.beginPath();ctx.arc(o.x,o.y,rr*0.87,0,Math.PI*2);ctx.strokeStyle=col;ctx.lineWidth=1.1;ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
+  }
+  const cap=project({id:'cap_'+gal,pos:[center[0],center[1]+(gal==='kotoba'||gal==='sosa'?103:116),center[2]],degree:0});
+  if(cap){ctx.textAlign='center';ctx.font='800 17px system-ui,Meiryo,sans-serif';ctx.shadowColor='#05101b';ctx.shadowBlur=8;ctx.fillStyle=col;ctx.fillText('✦ '+galaxyNames[gal]+' ✦',cap.x,cap.y);ctx.shadowBlur=0;}
+ }
+ // Star-cluster names appear only while exploring a galaxy. Their positions are distinct from the node labels.
+ if(domain==='setsumei'||domain==='bungaku'||domain==='all'&&distance<460){
+  for(const tree of ['setsumei','bungaku']){if(domain!=='all'&&domain!==tree)continue;
+   for(const ax of axOrder){const c=axCenter[tree+':'+ax];const o=project({id:'cluster_'+tree+ax,pos:[c[0],c[1]+32,c[2]],degree:0});if(!o)continue;
+    const frame=(data.trees.find(t=>t.id===tree)?.frames||[]).find(f=>f.ax===ax);
+    ctx.textAlign='center';ctx.font='750 12px system-ui,Meiryo,sans-serif';ctx.fillStyle=colors[ax]||'#dceafd';ctx.shadowColor='#05101b';ctx.shadowBlur=7;ctx.fillText('◈ '+(frame?.name||axisName[ax])+'星団',o.x,o.y);ctx.shadowBlur=0;
+   }
+  }
+ }
+ if(domain==='buki'||domain==='kotoba'||domain==='sosa'||domain==='all'&&distance<500){
+  for(const g of ['kotoba','sosa']){if(domain!=='all'&&domain!=='buki'&&domain!==g)continue;
+   const a=project({id:'cluster_'+g,pos:[centers[g][0],centers[g][1]+65,centers[g][2]],degree:0});
+   if(a){ctx.font='750 12px system-ui,Meiryo,sans-serif';ctx.textAlign='center';ctx.fillStyle=galaxyColors[g];ctx.fillText(g==='kotoba'?'◈ 知識・技能の概念群':'◈ 本文への操作・方略群',a.x,a.y);}
+  }
+ }
+}
+function draw(){
+ ctx.setTransform(pxratio,0,0,pxratio,0,0);ctx.fillStyle='#06101f';ctx.fillRect(0,0,W,H);
+ // Starfield background; stable across interactions.
+ for(const st of stars){ctx.fillStyle=`rgba(177,218,247,${st.a})`;ctx.beginPath();ctx.arc(st.x*W,st.y*H,st.r,0,7);ctx.fill();}
+ drawGalaxyGuides();
+ const q=nodes.filter(visible).map(project).filter(Boolean).sort((a,b)=>b.depth-a.depth);projected=q;
+ const mmap=new Map(q.map(q=>[q.id,q]));
+ for(const e of allLinks){if(e.type==='hier'&&!showHier||e.type==='tool'&&!showToolLinks&&(!selected||selected!==e.from&&selected!==e.to)||e.type!=='hier'&&e.type!=='tool'&&!showCross)continue;const a=mmap.get(e.from),b=mmap.get(e.to);if(!a||!b)continue;
+ const active=selected&&(selected===e.from||selected===e.to);line(a,b,e.type,e.dir,active,!!selected&&!active);}
+ for(const a of q)drawNode(a);
+ for(const a of q)label(a);
+}
+function nearest(x,y){for(let i=projected.length-1;i>=0;i--){const p=projected[i];const r=Math.max(11,p.rad+4);if((p.x-x)**2+(p.y-y)**2<r*r)return p;}return null;}
+function ease(t){return t<0.5?4*t*t*t:1-((-2*t+2)**3)/2}
+function flyTo(pos,dist,duration=940){motion={at:performance.now(),duration,start:target.slice(),end:pos.slice(),from:distance,to:dist};}
+function fly(n,dist){if(!n)return;flyTo(n.pos,dist??Math.max(55,Math.min(118,149/(1+n.degree*0.015))),860);}
+function resetView(){selected=null;hovered=null;yaw=-0.22;pitch=0.2;flyTo([0,-8,0],1100,950);domain='all';updateSeg();showDetail();$('#q').value='';$('#results').innerHTML='';}
+function goGalaxy(gal){selected=null;showDetail();
+ if(gal==='all')flyTo([0,-8,0],1100,1000);
+ else if(gal==='buki')flyTo([0,-10,125],700,960);
+ else flyTo(centers[gal],gal==='kotoba'||gal==='sosa'?440:410,960);
+ domain=gal;updateSeg();}
+function select(id,doFly=false){if(!lookup.has(id))return;selected=id;hovered=id;const n=lookup.get(id);if(domain!=='all'&&!visible(n)){domain=n.galaxy;updateSeg();}
+ showDetail();if(doFly)fly(n);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+// A source badge opens the exact quote, source title and page in the original app.
+function metaLine(arr){return arr.filter(x=>x!=null&&String(x).trim()!=='').map(esc).join(' · ');}
+function makeCites(n){
+ const bases=(n.source_refs||[]).map(item=>{const r=refLookup.get(item.id);if(!r)return '';
+  const pag=r.page?'印刷 p.'+r.page:'';const pdf=r.pdf_page?'PDF p.'+r.pdf_page:'';
+  return `<div class="refcard"><div class="refhead">${esc(r.label||r.id)}</div><div>${(item.where||[]).map(t=>`<span class="reftag">${esc(t)}</span>`).join('')}</div><div class="refmeta">${metaLine([r.source,pag,pdf])}</div>${r.quote?`<blockquote class="refquote">${esc(r.quote)}</blockquote>`:''}</div>`;
+ }).join('');
+ const works=(n.lit_refs||[]).map(id=>{const r=litLookup.get(id);if(!r)return '';
+  const safeUrl=/^https?:\/\//i.test(r.url||'')?String(r.url):'';
+  return `<div class="refcard"><div class="refhead">${esc(r.chip||r.title||r.id)}</div><div class="refmeta">${metaLine([r.author,r.year,r.title,r.journal,r.pages])}</div>${r.via?`<div class="refdesc">参照経路：${esc(r.via)}</div>`:''}${r.define?`<div class="refdesc"><b>研究上の定義・説明</b>：${esc(r.define)}</div>`:''}${r.quote?`<blockquote class="refquote">${esc(r.quote)}</blockquote>`:''}${r.quote_by?`<div class="refmeta">引用の出所：${esc(r.quote_by)}</div>`:''}${safeUrl?`<a class="refurl" href="${esc(safeUrl)}" target="_blank" rel="noopener noreferrer">出典資料を開く</a>`:''}</div>`;
+ }).join('');
+ if(!bases&&!works)return '';
+ return `<div class="citebar">${bases?`<details class="citewrap"><summary>根拠の引用 <span class="citecount">${(n.source_refs||[]).length}</span></summary><div class="citepanel">${bases}</div></details>`:''}${works?`<details class="citewrap literature"><summary>研究文献 <span class="citecount">${(n.lit_refs||[]).length}</span></summary><div class="citepanel">${works}</div></details>`:''}</div>`;
+}
+function showDetail(){const section=$('#detail'),body=$('#detailBody');if(!selected){section.hidden=true;return}const n=lookup.get(selected);const conn=[...neighbors.get(n.id)].map(id=>lookup.get(id)).sort((a,b)=>b.degree-a.degree);
+ const mname=galaxyNames[n.galaxy];
+ const stageRefIds=new Set((n.source_refs||[]).map(x=>x.id));
+ const domains=new Set([...stageRefIds].map(id=>(refLookup.get(id)||{}).dom));
+ const badges=[...(domains.has('知')?['【知】']:[]),...(Array.from(domains).some(x=>x==='読'||x==='書'||x==='話'||x==='思')?['【思】']:[])];
+ body.innerHTML=`<div class="kind"><span style="color:${colors[n.axis]||'#fff'}">●</span> ${esc(mname)} / ${esc(axisName[n.axis])} / ${esc(n.kind)} ${badges.join('')}</div><h3>${esc(n.label_h)}</h3>
+ <dl class="kv"><dt>接続数</dt><dd><strong>${n.degree} ノード</strong>（親子・概念関係・そうさ使用の重複を除く）</dd><dt>識別子</dt><dd>${esc(n.id)}</dd><dt>依存条件</dt><dd>${esc(n.dep||'指定なし')}</dd><dt>位置付け</dt><dd>${esc(n.mode||'基本')}</dd><dt>学習段階</dt><dd>${n.band?['','低学年','中学年','高学年'][n.band]:'階層ノード'}</dd></dl>
+ ${n.explain?`<p><strong>概念の説明</strong><br>${esc(n.explain)}</p>`:''}
+ ${makeCites(n)}
+  ${toolFrom.get(n.id)?.length?`<p><strong>このわざで使う「そうさ」</strong></p><div class="connlist">${toolFrom.get(n.id).map(id=>lookup.get(id)).filter(Boolean).map(z=>`<button data-to="${esc(z.id)}">${esc(z.label_h)}</button>`).join('')}</div>`:''}
+  ${toolTo.get(n.id)?.length?`<p><strong>この「そうさ」を使うわざ（${toolTo.get(n.id).length}）</strong></p><div class="connlist">${toolTo.get(n.id).slice(0,45).map(id=>lookup.get(id)).filter(Boolean).map(z=>`<button data-to="${esc(z.id)}">${esc(z.label_h)}</button>`).join('')}</div>`:''}
+  <p><strong>直接つながるノード（${conn.length}）</strong></p><div class="connlist">${conn.slice(0,35).map(z=>`<button data-to="${esc(z.id)}">${esc(z.label_h)}</button>`).join('')}</div>`;
+ section.hidden=false;body.querySelectorAll('[data-to]').forEach(btn=>btn.addEventListener('click',()=>select(btn.dataset.to,true)));
+}
+function updateSeg(){document.querySelectorAll('#domain button').forEach(b=>b.classList.toggle('active',b.dataset.d===domain));}
+function resize(){pxratio=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;canvas.width=Math.round(W*pxratio);canvas.height=Math.round(H*pxratio);}
+function update(){const now=performance.now();if(motion){let t=Math.min(1,(now-motion.at)/motion.duration),a=ease(t);for(let i=0;i<3;i++)target[i]=motion.start[i]+(motion.end[i]-motion.start[i])*a;distance=motion.from+(motion.to-motion.from)*a;if(t>=1)motion=null;}
+ // Continuous keyboard flight, independent from the wheel zoom and drag rotation.
+ const dt=Math.min(0.06,(now-lastFrame)/1000);lastFrame=now;
+ const fwd=(keys.has('ArrowUp')?1:0)-(keys.has('ArrowDown')?1:0);
+ const strafe=(keys.has('ArrowRight')?1:0)-(keys.has('ArrowLeft')?1:0);
+ if(fwd||strafe){motion=null;auto=false;$('#auto').checked=false;
+  const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  const forward=[-sy*cp,-sp,-cy*cp],right=[cy,0,-sy];
+  const speed=Math.min(145,Math.max(10,distance*.19))*(keys.has('Shift')?3:1)*dt/Math.hypot(fwd,strafe);
+  for(let i=0;i<3;i++)target[i]+=(fwd*forward[i]+strafe*right[i])*speed;
+ }
+ if(auto&&!pointerDown&&!motion)yaw+=0.0016;
+ draw();$('#visibleCount').textContent=projected.length;requestAnimationFrame(update);}
+function moveEvent(e){const rect=canvas.getBoundingClientRect();mouse.x=e.clientX-rect.left;mouse.y=e.clientY-rect.top;}
+canvas.addEventListener('pointerdown',e=>{if(e.button!==0&&e.button!==1&&e.button!==2)return;canvas.setPointerCapture(e.pointerId);pointerDown={id:e.pointerId,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,shift:e.shiftKey||e.button===2};drag=false;canvas.classList.add('dragging');motion=null;});
+canvas.addEventListener('pointermove',e=>{moveEvent(e);if(pointerDown&&pointerDown.id===e.pointerId){const dx=e.clientX-pointerDown.px,dy=e.clientY-pointerDown.py;pointerDown.px=e.clientX;pointerDown.py=e.clientY;if(Math.hypot(e.clientX-pointerDown.x,e.clientY-pointerDown.y)>4)drag=true;
+ if(pointerDown.shift){const ratio=distance/Math.min(W*.82,H*1.15);const c=Math.cos(yaw),s=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+ // Translate in current screen-right and screen-up world basis.
+ const ux=[c,0,-s],uy=[-s*sp,cp,-c*sp];for(let i=0;i<3;i++)target[i]+=-dx*ratio*ux[i]+dy*ratio*uy[i];
+ }else{yaw+=dx*.006;pitch=Math.max(-1.42,Math.min(1.42,pitch+dy*.006));}}
+ else{const n=nearest(mouse.x,mouse.y);hovered=n?n.id:null;canvas.style.cursor=hovered?'pointer':'grab';}
+});
+canvas.addEventListener('pointerup',e=>{moveEvent(e);if(pointerDown?.id===e.pointerId){const wasDrag=drag;pointerDown=null;canvas.classList.remove('dragging');if(!wasDrag){const n=nearest(mouse.x,mouse.y);if(n)select(n.id,false);}}});
+canvas.addEventListener('pointercancel',()=>{pointerDown=null;canvas.classList.remove('dragging')});
+canvas.addEventListener('dblclick',e=>{moveEvent(e);const n=nearest(mouse.x,mouse.y);if(n)select(n.id,true);else resetView();});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+canvas.addEventListener('wheel',e=>{e.preventDefault();motion=null;const factor=Math.exp(Math.max(-200,Math.min(200,e.deltaY))*.00135);distance=Math.max(18,Math.min(1900,distance*factor));},{passive:false});
+// Pinch zoom; single-finger rotation handled via pointer events.
+canvas.addEventListener('touchstart',e=>{if(e.touches.length===2)pinch={sep:Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY),dist:distance};},{passive:true});
+canvas.addEventListener('touchmove',e=>{if(e.touches.length===2){e.preventDefault();let a=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(pinch){distance=Math.max(18,Math.min(1900,pinch.dist*pinch.sep/a));}pointerDown=null;}},{passive:false});
+canvas.addEventListener('touchend',e=>{if(e.touches.length<2)pinch=null;},{passive:true});
+window.addEventListener('resize',resize);
+$('#domain').addEventListener('click',e=>{const btn=e.target.closest('button[data-d]');if(!btn)return;goGalaxy(btn.dataset.d);});
+for(const [id,cb] of [['hier',v=>showHier=v],['cross',v=>showCross=v],['toolLinks',v=>showToolLinks=v],['labels',v=>showLabels=v],['focusOnly',v=>focusOnly=v],['research',v=>showResearch=v],['auto',v=>auto=v]]){$('#'+id).addEventListener('change',e=>cb(e.target.checked));}
+$('#scale').addEventListener('input',e=>{sizeMul=+e.target.value;$('#scaleVal').textContent=sizeMul.toFixed(1)});
+$('#home').addEventListener('click',resetView);$('#centerOne').addEventListener('click',()=>selected?fly(lookup.get(selected)):toast('先にノードを選択してください'));$('#clearSel').addEventListener('click',()=>{selected=null;showDetail();});$('#close').addEventListener('click',()=>{selected=null;showDetail();});
+let toastTimeout;function toast(str){const t=$('#toast');t.textContent=str;t.classList.add('show');clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>t.classList.remove('show'),2200);}
+$('#q').addEventListener('input',e=>{const v=e.target.value.trim().toLowerCase();const out=$('#results');if(!v){out.innerHTML='';return;}
+ const hit=nodes.filter(n=>n.label_h.toLowerCase().includes(v)||n.id.toLowerCase().includes(v)).slice(0,16);out.innerHTML=hit.map(n=>`<button data-id="${esc(n.id)}">${esc(n.label_h)}<span>${esc(galaxyNames[n.galaxy])}</span></button>`).join('')||'<div class="tiny">該当なし</div>';
+ out.querySelectorAll('[data-id]').forEach(b=>b.addEventListener('click',()=>{select(b.dataset.id,true);out.innerHTML='';}));});
+document.addEventListener('keydown',e=>{
+ const inText=e.target.closest('input,textarea,select,[contenteditable="true"]');
+ if(!inText&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();keys.add(e.key);if(e.shiftKey)keys.add('Shift');}
+ if(!inText&&e.key==='Shift')keys.add('Shift');
+ if(e.key==='Escape'){keys.clear();selected=null;showDetail();$('#q').blur();}
+ if(e.key==='Enter'&&document.activeElement===$('#q')){const b=$('#results [data-id]');if(b)b.click();}
+});
+document.addEventListener('keyup',e=>{keys.delete(e.key);if(!e.shiftKey)keys.delete('Shift');});
+window.addEventListener('blur',()=>keys.clear());
+$('#nCount').textContent=nodes.length;$('#eCount').textContent=edges.length;resize();requestAnimationFrame(update);
+})();
+</script></body></html>
