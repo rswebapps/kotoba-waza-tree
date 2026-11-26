@@ -55,6 +55,7 @@ body{overflow:hidden}canvas{display:block;width:100vw;height:100vh;cursor:grab;t
   <div class="brand"><div class="logo">✧</div><div><small>CONCEPT COSMOS / __VER__ · __DATE__</small><h1>ことばのわざ 概念宇宙</h1></div></div>
   <p class="intro">__VER__の概念・根拠・関係を四つの銀河として可視化。「ことば」と「そうさ」は探究の共通のぶきであり、説明・文学の探究と往還します。</p>
   <div class="statbar"><div class="stat"><b id="nCount">—</b><span>ノード</span></div><div class="stat"><b id="eCount">—</b><span>概念間エッジ</span></div><div class="stat"><b id="visibleCount">—</b><span>表示中</span></div></div>
+  <div class="section"><h2>表示する学年</h2><div class="segment" id="grade"><button data-g="all" class="active">すべて</button><button data-g="1">1年</button><button data-g="2">2年</button><button data-g="3">3年</button><button data-g="4">4年</button><button data-g="5">5年</button><button data-g="6">6年</button></div><p class="tiny" id="gradeNote"></p></div>
   <div class="section"><h2>表示する領域</h2><div class="segment" id="domain"><button data-d="all" class="active">宇宙全体</button><button data-d="buki">探究のぶき</button><button data-d="kotoba">ことば</button><button data-d="sosa">そうさ</button><button data-d="setsumei">説明の探究</button><button data-d="bungaku">文学の探究</button></div></div>
   <div class="section"><h2>ノードを探す</h2><div class="search"><input type="search" id="q" placeholder="概念名を検索して接近..." autocomplete="off"><div id="results"></div></div></div>
   <div class="section controls-section"><h2>接続・表示</h2><div class="checks">
@@ -78,6 +79,16 @@ const data=JSON.parse(document.getElementById('graphdata').textContent);
 const canvas=document.getElementById('world'), ctx=canvas.getContext('2d',{alpha:false});
 if(!ctx){alert('Canvasが利用できません');return;}
 const nodes=data.nodes,edges=data.edges,toolUses=data.toolUses||[];const lookup=new Map(nodes.map(n=>[n.id,n]));
+// 現れる学年：指導計画があれば、教材で初めて結び付く学年。なければ学習指導要領の学年帯の最初の学年（低＝1年・中＝3年・高＝5年）。
+// 学年帯のない枠（銀河・星雲）は、中のわざのいちばん早い学年。どれもなければ常に出す。
+const packFirst=data.packFirst||null;
+const kidsOf=new Map();for(const n of nodes){if(n.parent&&lookup.has(n.parent)){if(!kidsOf.has(n.parent))kidsOf.set(n.parent,[]);kidsOf.get(n.parent).push(n);}}
+const appearMemo=new Map();
+function appear(n){if(appearMemo.has(n.id))return appearMemo.get(n.id);appearMemo.set(n.id,null);
+ let g=packFirst&&packFirst[n.id]?packFirst[n.id]:(n.band?n.band*2-1:null);
+ if(g==null){const ks=(kidsOf.get(n.id)||[]).map(appear).filter(x=>x!=null);g=ks.length?Math.min(...ks):null;}
+ appearMemo.set(n.id,g);return g;}
+for(const n of nodes)n.appear=appear(n);
 const refLookup=new Map((data.refs||[]).map(r=>[r.id,r]));const litLookup=new Map((data.lits||[]).map(r=>[r.id,r]));
 const axisName={p:'前提',s:'構成',l:'論理／変化',t:'要旨／主題',e:'表現',f:'効果',n:'そうさ',k:'ことば'};
 const colors={p:'#b5a1f7',s:'#71bfff',l:'#63ddcd',t:'#f38a96',e:'#f7c17b',f:'#f47fb4',n:'#c4e987',k:'#f3d789'};
@@ -121,13 +132,13 @@ function place(n){if(placed.has(n.id))return placed.get(n.id);let p;
    p=xyzAdd(center,offset);
  }}placed.set(n.id,p);return p;}
 for(const n of nodes)n.pos=place(n);
-let domain='all',showHier=true,showCross=true,showToolLinks=false,showLabels=true,focusOnly=false,showResearch=true,auto=false,sizeMul=1;
+let grade='all',domain='all',showHier=true,showCross=true,showToolLinks=false,showLabels=true,focusOnly=false,showResearch=true,auto=false,sizeMul=1;
 let selected=null,hovered=null,yaw=-0.22,pitch=0.2,distance=1100,target=[0,-8,0],motion=null,pxratio=1,W=0,H=0,mouse={x:-1e4,y:-1e4};
 let pointerDown=null,drag=false,touches=new Map(),pinch=null;let projected=[];
 const keys=new Set();let lastFrame=performance.now();
 let seed=192837465;function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;}const stars=Array.from({length:270},()=>({x:rand(),y:rand(),r:0.4+1.1*rand(),a:0.13+0.5*rand()}));
 const $=s=>document.querySelector(s);
-function visible(n){return (domain==='all'||n.galaxy===domain||(domain==='buki'&&['kotoba','sosa'].includes(n.galaxy))) && (showResearch||n.mode!=='研究') && (!focusOnly||!selected||n.id===selected||neighbors.get(selected).has(n.id));}
+function visible(n){return (grade==='all'||n.appear==null||n.appear<=grade) && (domain==='all'||n.galaxy===domain||(domain==='buki'&&['kotoba','sosa'].includes(n.galaxy))) && (showResearch||n.mode!=='研究') && (!focusOnly||!selected||n.id===selected||neighbors.get(selected).has(n.id));}
 function view(node){const dx=node.pos[0]-target[0],dy=node.pos[1]-target[1],dz=node.pos[2]-target[2];
  const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
  const x=dx*cy-dz*sy,z=dx*sy+dz*cy,y=dy*cp-z*sp,z2=dy*sp+z*cp;return {x,y,z:z2};}
@@ -208,7 +219,7 @@ function goGalaxy(gal){selected=null;showDetail();
  else if(gal==='buki')flyTo([0,-10,125],700,960);
  else flyTo(centers[gal],gal==='kotoba'||gal==='sosa'?440:410,960);
  domain=gal;updateSeg();}
-function select(id,doFly=false){if(!lookup.has(id))return;selected=id;hovered=id;const n=lookup.get(id);if(domain!=='all'&&!visible(n)){domain=n.galaxy;updateSeg();}
+function select(id,doFly=false){if(!lookup.has(id))return;selected=id;hovered=id;const n=lookup.get(id);if(grade!=='all'&&n.appear&&n.appear>grade){grade=n.appear;document.querySelectorAll('#grade button').forEach(b=>b.classList.toggle('active',b.dataset.g===String(grade)));}if(domain!=='all'&&!visible(n)){domain=n.galaxy;updateSeg();}
  showDetail();if(doFly)fly(n);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 // A source badge opens the exact quote, source title and page in the original app.
@@ -231,7 +242,7 @@ function showDetail(){const section=$('#detail'),body=$('#detailBody');if(!selec
  const domains=new Set([...stageRefIds].map(id=>(refLookup.get(id)||{}).dom));
  const badges=[...(domains.has('知')?['【知】']:[]),...(Array.from(domains).some(x=>x==='読'||x==='書'||x==='話'||x==='思')?['【思】']:[])];
  body.innerHTML=`<div class="kind"><span style="color:${colors[n.axis]||'#fff'}">●</span> ${esc(mname)} / ${esc(axisName[n.axis])} / ${esc(n.kind)} ${badges.join('')}</div><h3>${esc(n.label_h)}</h3>
- <dl class="kv"><dt>接続数</dt><dd><strong>${n.degree} ノード</strong>（親子・概念関係・そうさ使用の重複を除く）</dd><dt>識別子</dt><dd>${esc(n.id)}</dd><dt>依存条件</dt><dd>${esc(n.dep||'指定なし')}</dd><dt>位置付け</dt><dd>${esc(n.mode||'基本')}</dd><dt>学習段階</dt><dd>${n.band?['','低学年','中学年','高学年'][n.band]:'階層ノード'}</dd></dl>
+ <dl class="kv"><dt>接続数</dt><dd><strong>${n.degree} ノード</strong>（親子・概念関係・そうさ使用の重複を除く）</dd><dt>識別子</dt><dd>${esc(n.id)}</dd><dt>依存条件</dt><dd>${esc(n.dep||'指定なし')}</dd><dt>位置付け</dt><dd>${esc(n.mode||'基本')}</dd><dt>学習段階</dt><dd>${n.band?['','低学年','中学年','高学年'][n.band]:'階層ノード'}</dd><dt>現れる学年</dt><dd>${n.appear?n.appear+'年'+(packFirst&&packFirst[n.id]?'（指導計画の教材）':n.band?'（学年帯）':'（中のわざ）'):'—'}</dd></dl>
  ${n.explain?`<p><strong>概念の説明</strong><br>${esc(n.explain)}</p>`:''}
  ${makeCites(n)}
   ${toolFrom.get(n.id)?.length?`<p><strong>このわざで使う「そうさ」</strong></p><div class="connlist">${toolFrom.get(n.id).map(id=>lookup.get(id)).filter(Boolean).map(z=>`<button data-to="${esc(z.id)}">${esc(z.label_h)}</button>`).join('')}</div>`:''}
@@ -273,6 +284,9 @@ canvas.addEventListener('touchstart',e=>{if(e.touches.length===2)pinch={sep:Math
 canvas.addEventListener('touchmove',e=>{if(e.touches.length===2){e.preventDefault();let a=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(pinch){distance=Math.max(18,Math.min(1900,pinch.dist*pinch.sep/a));}pointerDown=null;}},{passive:false});
 canvas.addEventListener('touchend',e=>{if(e.touches.length<2)pinch=null;},{passive:true});
 window.addEventListener('resize',resize);
+$('#grade').addEventListener('click',e=>{const btn=e.target.closest('button[data-g]');if(!btn)return;grade=btn.dataset.g==='all'?'all':+btn.dataset.g;
+ document.querySelectorAll('#grade button').forEach(b=>b.classList.toggle('active',b===btn));if(selected&&!visible(lookup.get(selected))){selected=null;showDetail();}});
+$('#gradeNote').textContent=packFirst?'選んだ学年の終わりまでに現れる星だけを出します。指導計画の教材で初めて結び付く学年（教材に結び付かないわざは学年帯）で決めます。':'選んだ学年の終わりまでに現れる星だけを出します。学習指導要領の学年帯で決めます（低学年＝1年、中学年＝3年、高学年＝5年から）。';
 $('#domain').addEventListener('click',e=>{const btn=e.target.closest('button[data-d]');if(!btn)return;goGalaxy(btn.dataset.d);});
 for(const [id,cb] of [['hier',v=>showHier=v],['cross',v=>showCross=v],['toolLinks',v=>showToolLinks=v],['labels',v=>showLabels=v],['focusOnly',v=>focusOnly=v],['research',v=>showResearch=v],['auto',v=>auto=v]]){$('#'+id).addEventListener('change',e=>cb(e.target.checked));}
 $('#scale').addEventListener('input',e=>{sizeMul=+e.target.value;$('#scaleVal').textContent=sizeMul.toFixed(1)});

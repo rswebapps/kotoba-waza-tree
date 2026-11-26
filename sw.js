@@ -1,5 +1,5 @@
 // ことばのわざ概念ツリー：オフラインでも開けるようにする（通信できるときは常に最新を取りに行く）
-const CACHE = 'kotoba-waza-v3';
+const CACHE = 'kotoba-waza-v5';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon.svg', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => {
